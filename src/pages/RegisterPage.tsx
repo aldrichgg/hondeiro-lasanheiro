@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthService } from '../services/AuthService';
 import { UserPlus, Mail, Lock, Car } from 'lucide-react';
+import { SparklesCore } from '../components/ui/Sparkles';
+import { Button } from '../components/ui/MovingBorder';
+import { TextGenerateEffect } from '../components/ui/TextGenerateEffect';
 
 export const RegisterPage = () => {
     const [email, setEmail] = useState('');
@@ -31,20 +34,31 @@ export const RegisterPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
-            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="min-h-screen w-full bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="w-full absolute inset-0 h-screen">
+                <SparklesCore
+                    id="tsparticlesregister"
+                    background="transparent"
+                    minSize={0.6}
+                    maxSize={1.4}
+                    particleDensity={50}
+                    className="w-full h-full"
+                    particleColor="#10b981"
+                />
+            </div>
 
             <div className="w-full max-w-md space-y-8 relative z-10">
                 <div className="text-center space-y-4">
-                    <div className="inline-flex p-4 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl">
+                    <div className="inline-flex p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-2xl backdrop-blur-xl">
                         <Car size={32} className="text-emerald-400" />
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight gradient-text">CivicAI</h1>
-                    <p className="text-zinc-400">Comece a cuidar melhor do seu Civic hoje</p>
+                    <div className="flex flex-col items-center">
+                        <TextGenerateEffect words="CivicAI" className="text-4xl font-bold tracking-tight text-white mb-0" />
+                        <p className="text-zinc-400 mt-1">Comece a cuidar melhor do seu Civic hoje</p>
+                    </div>
                 </div>
 
-                <form onSubmit={handleRegister} className="glass p-6 sm:p-8 rounded-3xl space-y-6">
+                <form onSubmit={handleRegister} className="bg-zinc-900/40 border border-zinc-800 backdrop-blur-xl p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl">
                     {error && (
                         <div className="p-3 text-sm bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-center">
                             {error}
@@ -60,7 +74,7 @@ export const RegisterPage = () => {
                                     type="text"
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
-                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all font-light"
                                     placeholder="Seu nome"
                                     required
                                 />
@@ -75,7 +89,7 @@ export const RegisterPage = () => {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all font-light"
                                     placeholder="seu@email.com"
                                     required
                                 />
@@ -90,7 +104,7 @@ export const RegisterPage = () => {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all font-light"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -105,7 +119,7 @@ export const RegisterPage = () => {
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all font-light"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -113,18 +127,18 @@ export const RegisterPage = () => {
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 group disabled:opacity-50"
+                    <Button
+                        borderRadius="1rem"
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 flex items-center justify-center gap-2 group disabled:opacity-50"
+                        containerClassName="w-full"
                     >
                         {loading ? 'Criando conta...' : (
-                            <>
-                                Criar Conta
+                            <div className="flex items-center gap-2">
+                                <span>Criar Conta</span>
                                 <UserPlus size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </>
+                            </div>
                         )}
-                    </button>
+                    </Button>
 
                     <p className="text-center text-sm text-zinc-500">
                         Já tem uma conta?{' '}

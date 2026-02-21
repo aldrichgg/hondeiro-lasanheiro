@@ -1,133 +1,104 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-    collection,
-    query,
-    where,
-    onSnapshot
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/AuthContext';
+import { BackgroundBeams } from '../components/ui/BackgroundBeams';
+import { SparklesCore } from '../components/ui/Sparkles';
+import { BentoGrid, BentoGridItem } from '../components/ui/BentoGrid';
+import { TextGenerateEffect } from '../components/ui/TextGenerateEffect';
+import { Meteors } from '../components/ui/Meteors';
 import {
     MessageSquare,
     Car,
-    ArrowRight,
-    Loader2
+    BookOpen,
+    Store
 } from 'lucide-react';
-import { BackgroundBeams } from '../components/ui/BackgroundBeams';
 
 export const DashboardPage = () => {
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const [stats, setStats] = useState({
-        vehicles: 0,
-        chats: 0
-    });
-    const [loading, setLoading] = useState(true);
+    const { userProfile } = useAuth();
 
-    useEffect(() => {
-        setLoading(true);
-    }, [user]);
-
-    useEffect(() => {
-        if (!user) return;
-
-        const unsubscribeVehicles = onSnapshot(
-            query(collection(db, 'vehicles'), where('userId', '==', user.uid)),
-            (snapshot) => setStats(prev => ({ ...prev, vehicles: snapshot.size }))
-        );
-
-        const unsubscribeSessions = onSnapshot(
-            query(collection(db, 'chat_sessions'), where('userId', '==', user.uid)),
-            (snapshot) => setStats(prev => ({ ...prev, chats: snapshot.size }))
-        );
-
-        setLoading(false);
-
-        return () => {
-            unsubscribeVehicles();
-            unsubscribeSessions();
-        };
-    }, [user]);
+    const items = [
+        {
+            title: "Chat IA CivicAI",
+            description: "Tire dúvidas técnicas sobre seu Honda Civic em segundos.",
+            header: (
+                <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/[0.1] items-center justify-center overflow-hidden relative">
+                    <Meteors number={10} />
+                    <MessageSquare className="w-12 h-12 text-blue-400 opacity-50" />
+                </div>
+            ),
+            icon: <MessageSquare className="h-4 w-4 text-neutral-500" />,
+            className: "md:col-span-2",
+        },
+        {
+            title: "Meu Veículo",
+            description: "Gerencie as informações do seu carro.",
+            header: (
+                <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/[0.1] items-center justify-center">
+                    <Car className="w-12 h-12 text-purple-400 opacity-50" />
+                </div>
+            ),
+            icon: <Car className="h-4 w-4 text-neutral-500" />,
+            className: "md:col-span-1",
+        },
+        {
+            title: "Biblioteca Técnica",
+            description: "Acesse manuais e guias especializados.",
+            header: (
+                <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/[0.1] items-center justify-center">
+                    <BookOpen className="w-12 h-12 text-zinc-400 opacity-50" />
+                </div>
+            ),
+            icon: <BookOpen className="h-4 w-4 text-neutral-500" />,
+            className: "md:col-span-1",
+        },
+        {
+            title: "Authorized Sellers",
+            description: "Encontre peças e serviços de confiança.",
+            header: (
+                <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-white/[0.1] items-center justify-center">
+                    <Store className="w-12 h-12 text-orange-400 opacity-50" />
+                </div>
+            ),
+            icon: <Store className="h-4 w-4 text-neutral-500" />,
+            className: "md:col-span-2",
+        },
+    ];
 
     return (
-        <BackgroundBeams className="items-start pt-0 min-h-[calc(100vh-160px)]">
-            <div className="space-y-8 w-full relative z-10 px-4">
-                <header>
-                    <h1 className="text-3xl font-bold text-white">Bem-vindo ao CivicAI</h1>
-                    <p className="text-zinc-400 mt-2">Sua central de especialistas para Honda Civic 92-00.</p>
-                </header>
-
-                {/* Stats / Quick Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div onClick={() => navigate('/vehicle')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-blue-500/30 transition-all">
-                        <div className="space-y-1">
-                            <p className="text-zinc-500 text-sm font-medium">Veículos Cadastrados</p>
-                            {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.vehicles}</p>}
-                        </div>
-                        <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                            <Car size={24} />
-                        </div>
-                    </div>
-
-                    <div onClick={() => navigate('/chat')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-emerald-500/30 transition-all">
-                        <div className="space-y-1">
-                            <p className="text-zinc-500 text-sm font-medium">Consultas IA</p>
-                            {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.chats}</p>}
-                        </div>
-                        <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                            <MessageSquare size={24} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Action Cards */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="glass p-8 rounded-3xl space-y-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 text-blue-500/5 group-hover:text-blue-500/10 transition-colors">
-                            <MessageSquare size={160} />
-                        </div>
-
-                        <div className="space-y-4 relative z-10">
-                            <div className="h-12 w-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-                                <MessageSquare size={24} />
-                            </div>
-                            <h2 className="text-2xl font-bold text-white">Chat Técnico IA</h2>
-                            <p className="text-zinc-400 max-w-sm">
-                                Tire dúvidas sobre manutenção, torque de parafusos, diagramas elétricos e muito mais.
-                            </p>
-                            <button
-                                onClick={() => navigate('/chat')}
-                                className="flex items-center gap-2 text-blue-400 font-semibold hover:gap-3 transition-all"
-                            >
-                                Iniciar Conversa <ArrowRight size={18} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="glass p-8 rounded-3xl space-y-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 text-emerald-500/5 group-hover:text-emerald-500/10 transition-colors">
-                            <Car size={160} />
-                        </div>
-
-                        <div className="space-y-4 relative z-10">
-                            <div className="h-12 w-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
-                                <Car size={24} />
-                            </div>
-                            <h2 className="text-2xl font-bold text-white">Gerenciar Veículo</h2>
-                            <p className="text-zinc-400 max-w-sm">
-                                Configure as especificações do seu Civic para receber diagnósticos mais precisos.
-                            </p>
-                            <button
-                                onClick={() => navigate('/vehicle')}
-                                className="flex items-center gap-2 text-emerald-400 font-semibold hover:gap-3 transition-all"
-                            >
-                                Ver Detalhes <ArrowRight size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <div className="relative min-h-full w-full bg-zinc-950 flex flex-col items-center justify-start p-4 md:p-8 overflow-hidden">
+            <div className="w-full absolute inset-0 h-screen">
+                <SparklesCore
+                    id="tsparticlesfullpage"
+                    background="transparent"
+                    minSize={0.6}
+                    maxSize={1.4}
+                    particleDensity={100}
+                    className="w-full h-full"
+                    particleColor="#FFFFFF"
+                />
             </div>
-        </BackgroundBeams>
+
+            <div className="relative z-10 w-full max-w-7xl">
+                <div className="mb-12 text-left">
+                    <TextGenerateEffect words={`Bem-vindo ao CivicAI, ${userProfile?.fullName || 'Usuário'}`} />
+                    <p className="text-zinc-400 mt-2 max-w-2xl">
+                        Sua central inteligente para manutenção, suporte e performance do seu Honda Civic.
+                    </p>
+                </div>
+
+                <BentoGrid className="max-w-7xl mx-auto">
+                    {items.map((item, i) => (
+                        <BentoGridItem
+                            key={i}
+                            title={item.title}
+                            description={item.description}
+                            header={item.header}
+                            icon={item.icon}
+                            className={item.className}
+                        />
+                    ))}
+                </BentoGrid>
+            </div>
+
+            <BackgroundBeams className="opacity-40" />
+        </div>
     );
 };
