@@ -12,6 +12,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useUI } from '../hooks/UIContext';
+import { useAuth } from '../hooks/AuthContext';
 import { useEffect } from 'react';
 
 function cn(...inputs: ClassValue[]) {
@@ -30,12 +31,18 @@ const navItems = [
 
 export const Sidebar = () => {
     const { isSidebarOpen, closeSidebar } = useUI();
+    const { userProfile } = useAuth();
     const location = useLocation();
 
     // Close sidebar on navigation (mobile)
     useEffect(() => {
         closeSidebar();
     }, [location.pathname, closeSidebar]);
+
+    const items = [...navItems];
+    if (userProfile?.isAdmin) {
+        items.push({ icon: Settings, label: 'Painel Admin', href: '/admin' });
+    }
 
     return (
         <aside className={cn(
@@ -54,7 +61,7 @@ export const Sidebar = () => {
 
             <div className="p-6 pt-2 lg:pt-6">
                 <div className="space-y-1">
-                    {navItems.map((item) => (
+                    {items.map((item) => (
                         <NavLink
                             key={item.href}
                             to={item.href}

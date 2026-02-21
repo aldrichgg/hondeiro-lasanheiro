@@ -5,6 +5,7 @@ import { UserPlus, Mail, Lock, Car } from 'lucide-react';
 
 export const RegisterPage = () => {
     const [email, setEmail] = useState('');
+    const [displayName, setDisplayName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -20,7 +21,7 @@ export const RegisterPage = () => {
         setLoading(true);
         setError('');
         try {
-            await AuthService.register(email, password);
+            await AuthService.register(email, password, displayName);
             navigate('/');
         } catch (err: any) {
             setError('Erro ao criar conta. Tente outro email.');
@@ -51,6 +52,21 @@ export const RegisterPage = () => {
                     )}
 
                     <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-300 ml-1">Nome Completo</label>
+                            <div className="relative group">
+                                <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-emerald-400 transition-colors" size={18} />
+                                <input
+                                    type="text"
+                                    value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                    placeholder="Seu nome"
+                                    required
+                                />
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-300 ml-1">Email</label>
                             <div className="relative group">

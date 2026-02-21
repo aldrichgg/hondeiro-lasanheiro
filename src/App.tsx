@@ -12,6 +12,8 @@ import { ChatPage } from './pages/ChatPage';
 import { VehiclePage } from './pages/VehiclePage';
 import { LibraryPage } from './pages/LibraryPage';
 import { SellersPage } from './pages/SellersPage';
+import { AdminPage } from './pages/AdminPage';
+import { AdminLayout } from './layouts/AdminLayout';
 
 function App() {
   return (
@@ -29,6 +31,10 @@ function App() {
               <Route path="/library" element={<LibraryPage />} />
               <Route path="/sellers" element={<SellersPage />} />
               <Route path="*" element={<Navigate to="/" />} />
+            </Route>
+
+            <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+              <Route path="/admin" element={<AdminPage />} />
             </Route>
           </Routes>
         </Router>
