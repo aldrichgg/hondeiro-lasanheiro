@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../lib/firebase';
-import { ChatMessage } from '../types';
+import type { ChatMessage } from '../types';
 
 const functions = getFunctions();
 const askAICallable = httpsCallable(functions, 'askAI');

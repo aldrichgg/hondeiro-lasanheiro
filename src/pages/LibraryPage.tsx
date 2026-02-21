@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { LibraryService } from '../services/LibraryService';
-import { Document } from '../types';
+import type { Document } from '../types';
 import { BookOpen, Upload, FileText, CheckCircle2, Loader2, ArrowUpRight } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 export const LibraryPage = () => {
     const [documents, setDocuments] = useState<Document[]>([]);
@@ -47,11 +48,13 @@ export const LibraryPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Upload Area */}
                 <div className="lg:col-span-1 space-y-4">
-                    <label className={({
-                        "group relative flex flex-col items-center justify-center h-64 w-full border-2 border-dashed rounded-3xl transition-all cursor-pointer overflow-hidden": true,
-                        "border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-blue-500/50": !dragActive,
-                        "border-blue-500 bg-blue-500/5": dragActive
-                    })}
+                    <label className={cn(
+                        "group relative flex flex-col items-center justify-center h-64 w-full border-2 border-dashed rounded-3xl transition-all cursor-pointer overflow-hidden",
+                        {
+                            "border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900/50 hover:border-blue-500/50": !dragActive,
+                            "border-blue-500 bg-blue-500/5": dragActive
+                        }
+                    )}
                         onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                         onDragLeave={() => setDragActive(false)}
                         onDrop={(e) => { e.preventDefault(); setDragActive(false); if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]); }}

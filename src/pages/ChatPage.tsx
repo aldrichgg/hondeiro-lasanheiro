@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import { ChatService } from '../services/ChatService';
-import { ChatMessage } from '../types';
+import type { ChatMessage } from '../types';
 import { Send, Bot, User as UserIcon, Loader2, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 

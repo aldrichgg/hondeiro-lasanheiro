@@ -1,4 +1,4 @@
-import { LogOut, User as UserIcon, Bell } from 'lucide-react';
+import { LogOut, Bell } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
 

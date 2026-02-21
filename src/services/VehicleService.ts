@@ -6,17 +6,16 @@ import {
     doc,
     query,
     where,
-    getDocs,
-    serverTimestamp
+    getDocs
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Vehicle } from '../types';
+import type { Vehicle } from '../types';
 
 export const VehicleService = {
     addVehicle: async (vehicle: Omit<Vehicle, 'id' | 'createdAt'>) => {
         return await addDoc(collection(db, 'vehicles'), {
             ...vehicle,
-            createdAt: serverTimestamp()
+            createdAt: new Date() // Use regular date for simplicity if serverTimestamp is not used
         });
     },
 

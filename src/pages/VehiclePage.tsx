@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import { VehicleService } from '../services/VehicleService';
-import { Vehicle } from '../types';
+import type { Vehicle } from '../types';
 import { Car, Plus, Save, Trash2, Settings2 } from 'lucide-react';
 
 export const VehiclePage = () => {

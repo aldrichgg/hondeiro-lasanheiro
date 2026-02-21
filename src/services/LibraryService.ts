@@ -2,8 +2,7 @@ import {
     collection,
     getDocs,
     query,
-    orderBy,
-    serverTimestamp
+    orderBy
 } from 'firebase/firestore';
 import {
     ref,
@@ -11,7 +10,7 @@ import {
     getDownloadURL
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
-import { Document } from '../types';
+import type { Document } from '../types';
 
 export const LibraryService = {
     uploadPDF: async (file: File) => {
