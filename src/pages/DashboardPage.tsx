@@ -51,7 +51,7 @@ export const DashboardPage = () => {
     }, [user]);
 
     return (
-        <BackgroundBeams className="items-start pt-0 min-h-[calc(100vh-120px)]">
+        <BackgroundBeams className="items-start pt-0 min-h-[calc(100vh-160px)]">
             <div className="space-y-8 w-full relative z-10 px-4">
                 <header>
                     <h1 className="text-3xl font-bold text-white">Bem-vindo ao CivicAI</h1>

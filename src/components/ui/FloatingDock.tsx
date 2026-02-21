@@ -10,7 +10,8 @@ import {
     useTransform,
 } from "framer-motion";
 
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 export const FloatingDock = ({
     items,
@@ -43,7 +44,7 @@ const FloatingDockMobile = ({
                 {open && (
                     <motion.div
                         layoutId="nav"
-                        className="absolute inset-x-0 bottom-full mb-2 flex flex-col gap-3"
+                        className="absolute inset-x-0 bottom-full mb-2 flex flex-row justify-center gap-3 w-max left-1/2 -translate-x-1/2"
                     >
                         {items.map((item, idx) => (
                             <motion.div
@@ -60,15 +61,16 @@ const FloatingDockMobile = ({
                                         delay: idx * 0.05,
                                     },
                                 }}
-                                transition={{ delay: (items.length - 1 - idx) * 0.05 }}
+                                transition={{ delay: idx * 0.05 }}
                             >
-                                <a
-                                    href={item.href}
+                                <Link
+                                    to={item.href}
                                     key={item.title}
+                                    onClick={() => setOpen(false)}
                                     className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-800"
                                 >
                                     <div className="h-6 w-6 text-white">{item.icon}</div>
-                                </a>
+                                </Link>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -76,9 +78,9 @@ const FloatingDockMobile = ({
             </AnimatePresence>
             <button
                 onClick={() => setOpen(!open)}
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-800 shadow-xl"
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white border border-blue-500 shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
             >
-                <IconLayoutNavbarCollapse className="h-6 w-6 text-slate-400" />
+                <IconLayoutNavbarCollapse className="h-6 w-6" />
             </button>
         </div>
     );
@@ -162,7 +164,7 @@ function IconContainer({
     const [hovered, setHovered] = useState(false);
 
     return (
-        <a href={href}>
+        <Link to={href}>
             <motion.div
                 ref={ref}
                 style={{ width, height }}
@@ -189,6 +191,6 @@ function IconContainer({
                     {icon}
                 </motion.div>
             </motion.div>
-        </a>
+        </Link>
     );
 }

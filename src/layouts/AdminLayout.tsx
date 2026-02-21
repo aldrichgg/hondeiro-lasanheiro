@@ -129,15 +129,26 @@ export const AdminLayout = () => {
     );
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex flex-col lg:flex-row">
+        <div className="min-h-screen bg-zinc-950 flex flex-col lg:flex-row w-full overflow-x-hidden">
+            {/* Mobile Header */}
+            <header className="lg:hidden flex items-center justify-between px-6 h-16 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-40">
+                <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+                        <Settings size={18} />
+                    </div>
+                    <span className="font-bold text-white tracking-tight">CivicAI</span>
+                </div>
+                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">Admin</div>
+            </header>
+
             {/* Admin Sidebar (Desktop) */}
             <aside className="hidden lg:flex w-64 border-r border-zinc-800 bg-zinc-900/30 flex-col p-6 sticky top-0 h-screen">
                 <SidebarContent />
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/10 via-zinc-950 to-zinc-950 p-6 md:p-12 pb-24 lg:pb-12">
-                <div className="max-w-6xl mx-auto">
+            <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/10 via-zinc-950 to-zinc-950 p-6 md:p-12 pb-32 lg:pb-12 w-full">
+                <div className="max-w-6xl mx-auto w-full">
                     <Outlet />
                 </div>
             </main>

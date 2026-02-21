@@ -1,4 +1,3 @@
-"use strict";
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
@@ -37,8 +36,8 @@ const Beams = ({
     containerRef,
     parentRef,
 }: {
-    containerRef: React.RefObject<HTMLDivElement>;
-    parentRef: React.RefObject<HTMLDivElement>;
+    containerRef: React.RefObject<HTMLDivElement | null>;
+    parentRef: React.RefObject<HTMLDivElement | null>;
 }) => {
     const beams = [
         {
