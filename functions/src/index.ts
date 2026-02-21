@@ -1,3 +1,10 @@
+import * as admin from 'firebase-admin';
+
+// Initialize admin at the very beginning
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
+
 import * as functions from 'firebase-functions';
 import { chatService } from './chatService';
 import { processDocument } from './documentProcessor';

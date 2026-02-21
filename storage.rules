@@ -1,13 +1,47 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /documents/{allPaths=**} {
-      // Allow read for authenticated users, write only for authenticated users
-      // In production, we might want to restrict write to admin or specific flows
-      allow read, write: if request.auth != null;
+    // Helper function
+    function isSignedIn() {
+      return request.auth != null;
     }
+
+    // PDF Folder (Restricted to PDF files)
+    match /pdf/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() 
+                   && request.resource.contentType == 'application/pdf';
+    }
+
+    // Images Folder (Restricted to Image files)
+    match /imagens/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() 
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Audios Folder (Restricted to Audio files)
+    match /audios/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() 
+                   && request.resource.contentType.matches('audio/.*');
+    }
+
+    // Videos Folder (Restricted to Video files)
+    match /videos/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() 
+                   && request.resource.contentType.matches('video/.*');
+    }
+
+    // User-specific folders
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Legacy/Global documents path (if needed)
+    match /documents/{allPaths=**} {
+      allow read, write: if isSignedIn();
     }
   }
 }

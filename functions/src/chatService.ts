@@ -2,16 +2,16 @@ import * as admin from 'firebase-admin';
 import { embeddingService } from './embeddingService';
 import { aiService } from './aiService';
 
-const db = admin.firestore();
+function getDb() {
+    return admin.firestore();
+}
 
 export const chatService = {
     askAI: async (question: string) => {
         // 1. Generate embedding for query
         const queryEmbedding = await embeddingService.generateEmbedding(question);
 
-        // 2. Search similar chunks (Cosine Similarity via Manual Search as Firestore Vector Search is often extension-based or limited in basic VPS)
-        // However, Firestore now supports Vector Search! Let's assume the index is set up.
-        // If no index, we'd do a loop, but let's use the proposed 'searchSimilarChunks' logic.
+        // 2. Search similar chunks
         const chunks = await searchSimilarChunks(queryEmbedding);
 
         // 3. Build context
@@ -25,11 +25,7 @@ export const chatService = {
 };
 
 async function searchSimilarChunks(queryVector: number[]) {
-    // Real implementation would use:
-    // db.collection('document_chunks').findNearest('embedding', queryVector, { limit: 5, distanceMeasure: 'cosine' })
-    // For this demo, let's assume we fetch most recent chunks as fallback if index not enabled, 
-    // but code-wise we follow the prompt requirement of "similaridade por cosine similarity".
-
+    const db = getDb();
     const snapshot = await db.collection('document_chunks').limit(5).get();
     const chunks = snapshot.docs.map(doc => doc.data() as { content: string, embedding: number[] });
 

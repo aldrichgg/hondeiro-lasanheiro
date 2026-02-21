@@ -3,11 +3,10 @@ import * as admin from 'firebase-admin';
 import pdf from 'pdf-parse';
 import { embeddingService } from './embeddingService';
 
-// Initialize admin only if not already initialized
-if (!admin.apps.length) {
-    admin.initializeApp();
+// Helper for lazy database access
+function getDb() {
+    return admin.firestore();
 }
-const db = admin.firestore();
 
 export const processDocument = onObjectFinalized(async (event) => {
     const object = event.data;
@@ -28,6 +27,8 @@ export const processDocument = onObjectFinalized(async (event) => {
 
     // 2. Split into chunks (simple overlapping chunks)
     const chunks = chunkText(text, 1000, 200);
+
+    const db = getDb();
 
     // 3. Create document record
     const docRef = await db.collection('documents').add({
