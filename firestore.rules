@@ -16,13 +16,13 @@ service cloud.firestore {
 
     // Vehicles collection
     match /vehicles/{vehicleId} {
-      allow read, write: if isSignedIn() && isOwner(resource.data.userId || request.resource.data.userId);
+      allow read, write: if isSignedIn() && (resource == null || isOwner(resource.data.userId)) && isOwner(request.resource.data.userId);
     }
 
     // Documents (Read-only for users)
     match /documents/{documentId} {
       allow read: if isSignedIn();
-      allow write: if false; // Only via backend
+      allow write: if false; // Only via backend/admin
     }
 
     // Document Chunks (Read-only for users)
@@ -33,7 +33,7 @@ service cloud.firestore {
 
     // Chat Messages
     match /chat_messages/{messageId} {
-      allow read, write: if isSignedIn() && isOwner(request.resource.data.userId || resource.data.userId);
+      allow read, write: if isSignedIn() && (resource == null || isOwner(resource.data.userId)) && isOwner(request.resource.data.userId);
     }
   }
 }
