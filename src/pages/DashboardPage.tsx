@@ -50,7 +50,7 @@ export const DashboardPage = () => {
             className: "md:col-span-1",
         },
         {
-            title: "Authorized Sellers",
+            title: "Vendedores Autorizados",
             description: "Encontre peças e serviços de confiança.",
             header: (
                 <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-white/[0.1] items-center justify-center">
@@ -78,7 +78,7 @@ export const DashboardPage = () => {
 
             <div className="relative z-10 w-full max-w-7xl">
                 <div className="mb-12 text-left">
-                    <TextGenerateEffect words={`Bem-vindo ao CivicAI, ${userProfile?.fullName || 'Usuário'}`} />
+                    <TextGenerateEffect words={`Bem-vindo ao CivicAI, ${userProfile?.displayName || 'Usuário'}`} />
                     <p className="text-zinc-400 mt-2 max-w-2xl">
                         Sua central inteligente para manutenção, suporte e performance do seu Honda Civic.
                     </p>

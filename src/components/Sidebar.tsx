@@ -5,19 +5,11 @@ import {
     BookOpen,
     Settings,
     ShieldCheck,
-    Store,
-    X
+    Store
 } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { useUI } from '../hooks/UIContext';
+import { NavLink } from 'react-router-dom';
+import { cn } from '../lib/utils';
 import { useAuth } from '../hooks/AuthContext';
-import { useEffect } from 'react';
-
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
@@ -30,14 +22,7 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
-    const { isSidebarOpen, closeSidebar } = useUI();
     const { userProfile } = useAuth();
-    const location = useLocation();
-
-    // Close sidebar on navigation (mobile)
-    useEffect(() => {
-        closeSidebar();
-    }, [location.pathname, closeSidebar]);
 
     const items = [...navItems];
     if (userProfile?.isAdmin) {
@@ -45,21 +30,8 @@ export const Sidebar = () => {
     }
 
     return (
-        <aside className={cn(
-            "fixed inset-y-0 left-0 z-40 w-64 border-r border-zinc-800 bg-zinc-950 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-[calc(100vh-64px)]",
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
-            <div className="flex items-center justify-between p-6 lg:hidden">
-                <span className="text-xl font-bold gradient-text">CivicAI</span>
-                <button
-                    onClick={closeSidebar}
-                    className="p-2 text-zinc-400 hover:text-white transition-colors"
-                >
-                    <X size={20} />
-                </button>
-            </div>
-
-            <div className="p-6 pt-2 lg:pt-6">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-zinc-800 bg-zinc-950 transition-all duration-300 ease-in-out h-[calc(100vh-64px)] overflow-y-auto">
+            <div className="p-6 pt-6 flex-1">
                 <div className="space-y-1">
                     {items.map((item) => (
                         <NavLink
@@ -82,7 +54,7 @@ export const Sidebar = () => {
                 </div>
             </div>
 
-            <div className="mt-auto p-6 border-t border-zinc-900">
+            <div className="p-6 border-t border-zinc-900">
                 <div className="glass p-4 rounded-xl space-y-2">
                     <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Suporte Técnico</p>
                     <p className="text-[10px] text-zinc-500 leading-relaxed">

@@ -5,7 +5,6 @@ import {
     Store,
     Search,
     Loader2,
-    CheckCircle2,
     ShieldCheck
 } from 'lucide-react';
 import { SparklesCore } from '../components/ui/Sparkles';

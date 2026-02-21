@@ -180,7 +180,7 @@ export const LibraryPage = () => {
                                         <div className="px-6 py-4 bg-zinc-900/50 border-t border-zinc-800/50 flex items-center justify-between group-hover:bg-zinc-800/50 transition-colors">
                                             <div className="flex items-center gap-2 text-zinc-500">
                                                 <CategoryIcon size={14} />
-                                                <span className="text-[11px] font-medium uppercase tracking-tight">Technical Data</span>
+                                                <span className="text-[11px] font-medium uppercase tracking-tight">Dados Técnicos</span>
                                             </div>
                                             {doc.fileUrl && (
                                                 <a
