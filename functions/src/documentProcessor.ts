@@ -1,13 +1,18 @@
+import { onObjectFinalized } from 'firebase-functions/v2/storage';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
 import pdf from 'pdf-parse';
 import { embeddingService } from './embeddingService';
 
-admin.initializeApp();
+// Initialize admin only if not already initialized
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
 const db = admin.firestore();
 
-export const processDocument = functions.storage.object().onFinalizing(async (object) => {
+export const processDocument = onObjectFinalized(async (event) => {
+    const object = event.data;
     const filePath = object.name;
+
     if (!filePath || !filePath.endsWith('.pdf')) {
         console.log('Not a PDF. Skipping.');
         return;
