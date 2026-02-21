@@ -25,8 +25,9 @@ export const askAI = onRequest({ cors: true, region: 'us-central1' }, async (req
         const answer = await chatService.askAI(question, provider);
         res.send({ data: { answer } });
     } catch (error: any) {
-        console.error('Error in askAI:', error);
-        res.status(500).send({ data: { error: error.message } });
+        const message = error?.message ?? 'Erro interno ao processar a pergunta.';
+        console.error('Error in askAI:', message, error?.stack);
+        res.status(500).json({ data: { error: message } });
     }
 });
 

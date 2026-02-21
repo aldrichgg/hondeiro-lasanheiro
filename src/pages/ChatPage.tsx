@@ -230,7 +230,7 @@ export const ChatPage = () => {
                                             : "text-zinc-500 hover:text-zinc-300"
                                     )}
                                 >
-                                    Gemini 3 Flash
+                                    Gemini 1.5 Flash
                                 </button>
                                 <button
                                     onClick={() => setProvider('openai')}
@@ -241,7 +241,7 @@ export const ChatPage = () => {
                                             : "text-zinc-500 hover:text-zinc-300"
                                     )}
                                 >
-                                    GPT-5 Nano
+                                    GPT-4o Mini
                                 </button>
                             </div>
 

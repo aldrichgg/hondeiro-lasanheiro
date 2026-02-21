@@ -34,24 +34,28 @@ export const aiService = {
         if (provider === 'openai') {
             const openai = getOpenAI();
             const response = await openai.chat.completions.create({
-                model: 'gpt-5-nano',
+                model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: question }
                 ],
                 temperature: 0.3,
             });
-            return response.choices[0].message.content;
+            const content = response.choices[0]?.message?.content;
+            if (content == null) throw new Error('Resposta vazia da OpenAI');
+            return content;
         } else {
             const genAI = getGenAI();
             const model = genAI.getGenerativeModel({
-                model: 'gemini-3-flash',
+                model: 'gemini-1.5-flash',
                 systemInstruction: systemPrompt
             });
 
             const result = await model.generateContent(question);
             const response = await result.response;
-            return response.text();
+            const text = response.text?.();
+            if (text == null) throw new Error('Resposta vazia ou bloqueada do Gemini');
+            return text;
         }
     }
 };
