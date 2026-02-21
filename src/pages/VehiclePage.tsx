@@ -2,55 +2,89 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import { VehicleService } from '../services/VehicleService';
 import type { Vehicle } from '../types';
-import { Car, Plus, Save, Trash2, Settings2 } from 'lucide-react';
+import { Car, Plus, Save, Trash2, Pencil, X, Loader2 } from 'lucide-react';
+
+const emptyForm: Omit<Vehicle, 'id' | 'userId' | 'createdAt'> = {
+    model: 'Civic',
+    year: new Date().getFullYear(),
+    engine: 'D16Y8',
+    transmission: 'Manual',
+    nickname: 'Meu Civic',
+};
+
+function formatDate(value: unknown): string {
+    if (!value) return '—';
+    if (typeof (value as { toDate?: () => Date }).toDate === 'function') {
+        return (value as { toDate: () => Date }).toDate().toLocaleDateString('pt-BR');
+    }
+    if (value instanceof Date) return value.toLocaleDateString('pt-BR');
+    return String(value);
+}
 
 export const VehiclePage = () => {
     const { user } = useAuth();
-    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-    const [isAdding, setIsAdding] = useState(false);
+    const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-
-    const [formData, setFormData] = useState<Omit<Vehicle, 'id' | 'userId' | 'createdAt'>>({
-        model: 'Civic',
-        year: 1998,
-        engine: 'D16Y8',
-        transmission: 'Manual',
-        nickname: 'Meu Projeto',
-    });
+    const [formData, setFormData] = useState<Omit<Vehicle, 'id' | 'userId' | 'createdAt'>>(emptyForm);
 
     useEffect(() => {
-        if (user) {
-            const unsubscribe = VehicleService.subscribeToVehicles(user.uid, (data) => {
-                setVehicles(data);
-            });
-            return unsubscribe;
-        }
+        if (!user) return;
+        const unsubscribe = VehicleService.subscribeToUserVehicle(user.uid, setVehicle);
+        return unsubscribe;
     }, [user]);
 
-    // loadVehicles is no longer needed but we'll remove its calls
+    const openCreate = () => {
+        setFormData(emptyForm);
+        setEditingId(null);
+        setIsFormOpen(true);
+    };
+
+    const openEdit = (v: Vehicle) => {
+        setFormData({
+            model: v.model,
+            year: v.year,
+            engine: v.engine,
+            transmission: v.transmission,
+            nickname: v.nickname,
+        });
+        setEditingId(v.id ?? null);
+        setIsFormOpen(true);
+    };
+
+    const closeForm = () => {
+        setIsFormOpen(false);
+        setEditingId(null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) return;
         setLoading(true);
         try {
-            await VehicleService.addVehicle({ ...formData, userId: user.uid });
-            setIsAdding(false);
-            // Subscription handles update
-        } catch (error) {
-            console.error(error);
+            if (editingId) {
+                await VehicleService.updateVehicle(editingId, formData);
+            } else {
+                await VehicleService.createVehicle({ ...formData, userId: user.uid });
+            }
+            closeForm();
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : 'Erro ao salvar.');
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Tem certeza que deseja excluir este veículo?')) return;
+        if (!window.confirm('Excluir este veículo? Esta ação não pode ser desfeita.')) return;
         try {
             await VehicleService.deleteVehicle(id);
-            // Subscription handles update
-        } catch (error) {
-            console.error(error);
+            closeForm();
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao excluir.');
         }
     };
 
@@ -59,39 +93,54 @@ export const VehiclePage = () => {
             <header className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-white">Meu Veículo</h1>
-                    <p className="text-zinc-400 mt-1">Gerencie as configurações do seu Honda.</p>
+                    <p className="text-zinc-400 mt-1">Perfil do seu Honda Civic para respostas personalizadas.</p>
                 </div>
-                {!isAdding && (
+                {!isFormOpen && !vehicle && (
                     <button
-                        onClick={() => setIsAdding(true)}
+                        onClick={openCreate}
                         className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
                     >
                         <Plus size={18} />
-                        Cadastrar Novo
+                        Cadastrar veículo
                     </button>
                 )}
             </header>
 
-            {isAdding && (
-                <form onSubmit={handleSubmit} className="glass p-8 rounded-3xl space-y-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+            {isFormOpen && (
+                <form
+                    onSubmit={handleSubmit}
+                    className="glass p-8 rounded-3xl space-y-6 border border-zinc-800/50"
+                >
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-white">
+                            {editingId ? 'Editar veículo' : 'Novo veículo'}
+                        </h2>
+                        <button type="button" onClick={closeForm} className="p-2 text-zinc-500 hover:text-white">
+                            <X size={20} />
+                        </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-400">Modelo</label>
                             <input
                                 type="text"
                                 value={formData.model}
-                                onChange={e => setFormData({ ...formData, model: e.target.value })}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white focus:border-blue-500/50 outline-none"
-                                placeholder="Civic Sedan"
+                                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:border-blue-500/50 outline-none"
+                                placeholder="Ex: Civic Sedan"
+                                required
                             />
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-400">Ano</label>
                             <input
                                 type="number"
+                                min={1992}
+                                max={2000}
                                 value={formData.year}
-                                onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white focus:border-blue-500/50 outline-none"
+                                onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:border-blue-500/50 outline-none"
+                                required
                             />
                         </div>
                         <div className="space-y-2">
@@ -99,108 +148,117 @@ export const VehiclePage = () => {
                             <input
                                 type="text"
                                 value={formData.engine}
-                                onChange={e => setFormData({ ...formData, engine: e.target.value })}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white focus:border-blue-500/50 outline-none"
-                                placeholder="D16Y8 / B16A2"
+                                onChange={(e) => setFormData({ ...formData, engine: e.target.value })}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:border-blue-500/50 outline-none"
+                                placeholder="Ex: D16Y8, B16A2"
+                                required
                             />
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-400">Transmissão</label>
                             <select
                                 value={formData.transmission}
-                                onChange={e => setFormData({ ...formData, transmission: e.target.value as any })}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white focus:border-blue-500/50 outline-none"
+                                onChange={(e) =>
+                                    setFormData({ ...formData, transmission: e.target.value as Vehicle['transmission'] })
+                                }
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:border-blue-500/50 outline-none"
                             >
                                 <option value="Manual">Manual</option>
                                 <option value="Automatic">Automático</option>
                             </select>
                         </div>
                         <div className="space-y-2 md:col-span-2">
-                            <label className="text-sm font-medium text-zinc-400">Apelido do Projeto</label>
+                            <label className="text-sm font-medium text-zinc-400">Apelido</label>
                             <input
                                 type="text"
                                 value={formData.nickname}
-                                onChange={e => setFormData({ ...formData, nickname: e.target.value })}
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white focus:border-blue-500/50 outline-none"
+                                onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:border-blue-500/50 outline-none"
                                 placeholder="Ex: Black Beauty"
+                                required
                             />
                         </div>
                     </div>
-                    <div className="flex gap-4 pt-2">
+                    <div className="flex gap-3 pt-2">
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2"
                         >
-                            <Save size={18} />
-                            {loading ? 'Salvando...' : 'Salvar Veículo'}
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                            {loading ? 'Salvando...' : 'Salvar'}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsAdding(false)}
-                            className="px-6 border border-zinc-800 hover:bg-zinc-900 text-zinc-400 rounded-xl transition-all"
-                        >
+                        <button type="button" onClick={closeForm} className="px-6 py-3 border border-zinc-700 text-zinc-400 rounded-xl hover:bg-zinc-800">
                             Cancelar
                         </button>
                     </div>
                 </form>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {vehicles.map(vehicle => (
-                    <div key={vehicle.id} className="glass p-6 rounded-2xl space-y-4 group">
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                                    <Car size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-white text-lg">{vehicle.nickname}</h3>
-                                    <p className="text-zinc-500 text-sm">{vehicle.model} - {vehicle.year}</p>
-                                </div>
+            {vehicle && !isFormOpen && (
+                <div className="glass p-6 rounded-3xl border border-zinc-800/50 space-y-6">
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="h-14 w-14 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400">
+                                <Car size={28} />
                             </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white">{vehicle.nickname}</h3>
+                                <p className="text-zinc-500">
+                                    {vehicle.model} · {vehicle.year}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => openEdit(vehicle)}
+                                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                title="Editar"
+                            >
+                                <Pencil size={18} />
+                            </button>
                             <button
                                 onClick={() => vehicle.id && handleDelete(vehicle.id)}
-                                className="p-2 text-zinc-600 hover:text-red-400 transition-colors"
+                                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-500/30 transition-colors"
+                                title="Excluir"
                             >
                                 <Trash2 size={18} />
                             </button>
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4 pt-2">
-                            <div className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
-                                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">Motor</p>
-                                <p className="text-sm text-zinc-200">{vehicle.engine}</p>
-                            </div>
-                            <div className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800/50">
-                                <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">Câmbio</p>
-                                <p className="text-sm text-zinc-200">{vehicle.transmission}</p>
-                            </div>
-                        </div>
-
-                        <button className="w-full mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-500 hover:text-white transition-colors py-2 border border-dashed border-zinc-800 rounded-lg hover:border-zinc-700">
-                            <Settings2 size={14} />
-                            Editar Especificações
-                        </button>
                     </div>
-                ))}
-
-                {vehicles.length === 0 && !isAdding && (
-                    <div className="md:col-span-2 glass border-dashed border-2 border-zinc-800 p-12 rounded-3xl text-center space-y-4 opacity-50">
-                        <Car size={48} className="mx-auto text-zinc-700" />
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-medium text-white">Nenhum veículo cadastrado</h3>
-                            <p className="text-sm text-zinc-500">Cadastre seu Honda para receber dicas personalizadas.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800/50">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-1">Motor</p>
+                            <p className="text-sm font-medium text-zinc-200">{vehicle.engine}</p>
                         </div>
-                        <button
-                            onClick={() => setIsAdding(true)}
-                            className="text-blue-400 text-sm font-semibold hover:underline"
-                        >
-                            Adicionar agora
-                        </button>
+                        <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800/50">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-1">Câmbio</p>
+                            <p className="text-sm font-medium text-zinc-200">{vehicle.transmission}</p>
+                        </div>
+                        <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800/50">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-1">Modelo</p>
+                            <p className="text-sm font-medium text-zinc-200">{vehicle.model}</p>
+                        </div>
+                        <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800/50">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold mb-1">Cadastrado em</p>
+                            <p className="text-sm font-medium text-zinc-200">{formatDate(vehicle.createdAt)}</p>
+                        </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {!vehicle && !isFormOpen && (
+                <div className="glass border-2 border-dashed border-zinc-800 p-12 rounded-3xl text-center space-y-4">
+                    <Car size={48} className="mx-auto text-zinc-600" />
+                    <div>
+                        <h3 className="text-lg font-semibold text-white">Nenhum veículo cadastrado</h3>
+                        <p className="text-sm text-zinc-500 mt-1">Cadastre seu Honda para receber respostas personalizadas no chat.</p>
+                    </div>
+                    <button onClick={openCreate} className="text-blue-400 font-semibold hover:underline">
+                        Cadastrar veículo
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
