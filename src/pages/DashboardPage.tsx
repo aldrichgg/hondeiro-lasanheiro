@@ -11,7 +11,6 @@ import { useAuth } from '../hooks/AuthContext';
 import {
     MessageSquare,
     Car,
-    BookOpen,
     ArrowRight,
     Loader2
 } from 'lucide-react';
@@ -21,8 +20,7 @@ export const DashboardPage = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState({
         vehicles: 0,
-        chats: 0,
-        manuals: 0
+        chats: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -43,17 +41,11 @@ export const DashboardPage = () => {
             (snapshot) => setStats(prev => ({ ...prev, chats: snapshot.size }))
         );
 
-        const unsubscribeManuals = onSnapshot(
-            collection(db, 'documents'),
-            (snapshot) => setStats(prev => ({ ...prev, manuals: snapshot.size }))
-        );
-
         setLoading(false);
 
         return () => {
             unsubscribeVehicles();
             unsubscribeSessions();
-            unsubscribeManuals();
         };
     }, [user]);
 
@@ -85,16 +77,6 @@ export const DashboardPage = () => {
                     </div>
                     <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                         <MessageSquare size={24} />
-                    </div>
-                </div>
-
-                <div onClick={() => navigate('/library')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-amber-500/30 transition-all">
-                    <div className="space-y-1">
-                        <p className="text-zinc-500 text-sm font-medium">Manuais Disponíveis</p>
-                        {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.manuals}</p>}
-                    </div>
-                    <div className="p-3 bg-amber-500/10 rounded-xl text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                        <BookOpen size={24} />
                     </div>
                 </div>
             </div>

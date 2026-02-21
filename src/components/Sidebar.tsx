@@ -1,7 +1,6 @@
 import {
     LayoutDashboard,
     Car,
-    BookOpen,
     MessageSquare,
     Settings,
     ShieldCheck
@@ -18,7 +17,6 @@ const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
     { icon: MessageSquare, label: 'Chat IA', href: '/chat' },
     { icon: Car, label: 'Meu Veículo', href: '/vehicle' },
-    { icon: BookOpen, label: 'Biblioteca', href: '/library' },
     { icon: ShieldCheck, label: 'Segurança', href: '/security' },
     { icon: Settings, label: 'Ajustes', href: '/settings' },
 ];

@@ -9,7 +9,6 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ChatPage } from './pages/ChatPage';
 import { VehiclePage } from './pages/VehiclePage';
-import { LibraryPage } from './pages/LibraryPage';
 
 function App() {
   return (
@@ -23,7 +22,6 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/vehicle" element={<VehiclePage />} />
-            <Route path="/library" element={<LibraryPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Route>
         </Routes>

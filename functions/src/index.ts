@@ -1,44 +1,61 @@
 import 'dotenv/config';
 import * as admin from 'firebase-admin';
 
-// Initialize admin at the very beginning
 if (!admin.apps.length) {
     admin.initializeApp();
 }
 
-import { onRequest } from 'firebase-functions/v2/https';
-import { chatService } from './chatService';
-import { processDocument } from './documentProcessor';
-import { reindexKnowledgeBase } from './reindex';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 
-// Gen 2 functions automatically load .env files from the functions directory
-export const askAI = onRequest({ cors: true, region: 'us-central1' }, async (req, res) => {
+const CHATKIT_WORKFLOW_ID = 'wf_69992083730c8190ba39f1f3c891ae7d05e26fe333697b8d';
+const CHATKIT_SESSIONS_URL = 'https://api.openai.com/v1/chatkit/sessions';
+
+/**
+ * Cria uma sessão ChatKit para o usuário autenticado.
+ * O frontend usa o client_secret para conectar o widget ao workflow Hondeiro Lasanheiro.
+ * Documentação: https://developers.openai.com/api/docs/guides/chatkit
+ */
+export const createChatKitSession = onCall({ region: 'us-central1' }, async (request) => {
+    if (!request.auth?.uid) {
+        throw new HttpsError('unauthenticated', 'Usuário deve estar autenticado.');
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        throw new HttpsError('failed-precondition', 'OPENAI_API_KEY não configurada.');
+    }
+
     try {
-        console.log('Incoming request to askAI. Provider check:', !!process.env.GEMINI_API_KEY ? 'Gemini OK' : 'Gemini MISSING');
+        const res = await fetch(CHATKIT_SESSIONS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'OpenAI-Beta': 'chatkit_beta=v1',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                workflow: { id: CHATKIT_WORKFLOW_ID },
+                user: request.auth.uid,
+            }),
+        });
 
-        const { question, provider } = req.body.data || req.body;
-        if (!question) {
-            res.status(400).send({ data: { error: 'Question is required' } });
-            return;
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error('ChatKit session error:', res.status, errText);
+            throw new HttpsError('internal', `Erro ao criar sessão ChatKit: ${res.status}`);
         }
 
-        const answer = await chatService.askAI(question, provider);
-        res.send({ data: { answer } });
-    } catch (error: any) {
-        const message = error?.message ?? 'Erro interno ao processar a pergunta.';
-        console.error('Error in askAI:', message, error?.stack);
-        res.status(500).json({ data: { error: message } });
+        const data = (await res.json()) as { client_secret?: string };
+        const clientSecret = data?.client_secret;
+        if (!clientSecret) {
+            throw new HttpsError('internal', 'Resposta ChatKit sem client_secret.');
+        }
+
+        return { client_secret: clientSecret };
+    } catch (e: unknown) {
+        if (e instanceof HttpsError) throw e;
+        const message = e instanceof Error ? e.message : 'Erro ao criar sessão.';
+        console.error('createChatKitSession:', e);
+        throw new HttpsError('internal', message);
     }
 });
-
-export const reindexSettings = onRequest({ cors: true, region: 'us-central1' }, async (req, res) => {
-    try {
-        const result = await reindexKnowledgeBase();
-        res.send({ data: result });
-    } catch (error: any) {
-        console.error('Error in reindexSettings:', error);
-        res.status(500).send({ data: { error: error.message } });
-    }
-});
-
-export { processDocument };
