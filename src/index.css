@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  @apply bg-zinc-950 text-zinc-100 antialiased;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  @apply bg-zinc-900/50 backdrop-blur-md border border-zinc-800/50 shadow-xl;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 font-bold;
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-zinc-700/50;
+}
