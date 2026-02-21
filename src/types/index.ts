@@ -31,9 +31,18 @@ export interface DocumentChunk {
     createdAt: any;
 }
 
+export interface ChatSession {
+    id: string;
+    userId: string;
+    title: string;
+    createdAt: any;
+    lastMessageAt: any;
+}
+
 export interface ChatMessage {
     id?: string;
     userId: string;
+    sessionId: string;
     role: 'user' | 'assistant';
     content: string;
     createdAt: any;

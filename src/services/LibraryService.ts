@@ -4,7 +4,8 @@ import {
     query,
     orderBy,
     doc,
-    deleteDoc
+    deleteDoc,
+    onSnapshot
 } from 'firebase/firestore';
 import {
     ref,
@@ -57,6 +58,28 @@ export const LibraryService = {
                 throw innerError;
             }
         }
+    },
+
+    subscribeToDocuments: (callback: (docs: Document[]) => void) => {
+        const q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'));
+        return onSnapshot(q, (snapshot) => {
+            const docs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Document));
+            callback(docs);
+        }, (error) => {
+            console.error('Error in documents subscription:', error);
+            // Fallback for missing index or other errors
+            const qFallback = query(collection(db, 'documents'));
+            onSnapshot(qFallback, (snapshot) => {
+                const docs = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                } as Document));
+                callback(docs);
+            });
+        });
     },
 
     deleteFile: async (id: string, fileUrl: string) => {

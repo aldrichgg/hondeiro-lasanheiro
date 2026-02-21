@@ -4,7 +4,7 @@ import {
     collection,
     query,
     where,
-    getCountFromServer
+    onSnapshot
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/AuthContext';
@@ -27,31 +27,37 @@ export const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (user) {
-            loadStats();
-        }
+        setLoading(true);
     }, [user]);
 
-    const loadStats = async () => {
+    useEffect(() => {
         if (!user) return;
-        try {
-            const [vSnapshot, cSnapshot, mSnapshot] = await Promise.all([
-                getCountFromServer(query(collection(db, 'vehicles'), where('userId', '==', user.uid))),
-                getCountFromServer(query(collection(db, 'chat_messages'), where('userId', '==', user.uid))),
-                getCountFromServer(collection(db, 'documents'))
-            ]);
 
-            setStats({
-                vehicles: vSnapshot.data().count,
-                chats: cSnapshot.data().count,
-                manuals: mSnapshot.data().count
-            });
-        } catch (error) {
-            console.error('Error loading dashboard stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        const unsubscribeVehicles = onSnapshot(
+            query(collection(db, 'vehicles'), where('userId', '==', user.uid)),
+            (snapshot) => setStats(prev => ({ ...prev, vehicles: snapshot.size }))
+        );
+
+        const unsubscribeSessions = onSnapshot(
+            query(collection(db, 'chat_sessions'), where('userId', '==', user.uid)),
+            (snapshot) => setStats(prev => ({ ...prev, chats: snapshot.size }))
+        );
+
+        const unsubscribeManuals = onSnapshot(
+            collection(db, 'documents'),
+            (snapshot) => setStats(prev => ({ ...prev, manuals: snapshot.size }))
+        );
+
+        setLoading(false);
+
+        return () => {
+            unsubscribeVehicles();
+            unsubscribeSessions();
+            unsubscribeManuals();
+        };
+    }, [user]);
+
+    // loadStats is no longer used but we'll remove it or its call
 
     return (
         <div className="space-y-8">

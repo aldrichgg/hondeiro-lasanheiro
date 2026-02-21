@@ -6,7 +6,8 @@ import {
     doc,
     query,
     where,
-    getDocs
+    getDocs,
+    onSnapshot
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Vehicle } from '../types';
@@ -35,5 +36,16 @@ export const VehicleService = {
             id: doc.id,
             ...doc.data()
         } as Vehicle));
+    },
+
+    subscribeToVehicles: (userId: string, callback: (vehicles: Vehicle[]) => void) => {
+        const q = query(collection(db, 'vehicles'), where('userId', '==', userId));
+        return onSnapshot(q, (snapshot) => {
+            const vehicles = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Vehicle));
+            callback(vehicles);
+        });
     }
 };

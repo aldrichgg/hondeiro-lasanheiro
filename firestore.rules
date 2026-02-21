@@ -33,6 +33,13 @@ service cloud.firestore {
       allow write: if false; // Only via backend
     }
 
+    // Chat Sessions
+    match /chat_sessions/{sessionId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update: if isSignedIn() && isOwner(resource.data.userId);
+    }
+
     // Chat Messages
     match /chat_messages/{messageId} {
       allow read: if isSignedIn() && isOwner(resource.data.userId);

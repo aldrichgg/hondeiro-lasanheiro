@@ -12,9 +12,14 @@ export const LibraryPage = () => {
     const [filter, setFilter] = useState<'all' | 'pdf' | 'imagem' | 'audio' | 'video'>('all');
 
     useEffect(() => {
-        loadDocs();
+        const unsubscribe = LibraryService.subscribeToDocuments((data) => {
+            setDocuments(data);
+            setUploading(false); // New files arrived, probably done uploading
+        });
+        return unsubscribe;
     }, []);
 
+    // loadDocs is no longer needed but kept for Refresh button if user wants manual trigger
     const loadDocs = async () => {
         try {
             setError(null);
@@ -32,8 +37,7 @@ export const LibraryPage = () => {
         setError(null);
         try {
             await LibraryService.uploadFile(file);
-            // Wait for Cloud Function processing
-            setTimeout(loadDocs, 6000);
+            // No longer need timeout, subscription handles it
         } catch (error) {
             console.error(error);
             setError('Falha no upload do arquivo.');
@@ -47,7 +51,7 @@ export const LibraryPage = () => {
 
         try {
             await LibraryService.deleteFile(id, fileUrl);
-            setDocuments(prev => prev.filter(d => d.id !== id));
+            // No longer need manual state filter, subscription handles it
         } catch (err) {
             console.error(err);
             setError('Erro ao excluir o arquivo.');

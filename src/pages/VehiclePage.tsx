@@ -20,16 +20,14 @@ export const VehiclePage = () => {
 
     useEffect(() => {
         if (user) {
-            loadVehicles();
+            const unsubscribe = VehicleService.subscribeToVehicles(user.uid, (data) => {
+                setVehicles(data);
+            });
+            return unsubscribe;
         }
     }, [user]);
 
-    const loadVehicles = async () => {
-        if (user) {
-            const data = await VehicleService.getUserVehicles(user.uid);
-            setVehicles(data);
-        }
-    };
+    // loadVehicles is no longer needed but we'll remove its calls
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,7 +36,7 @@ export const VehiclePage = () => {
         try {
             await VehicleService.addVehicle({ ...formData, userId: user.uid });
             setIsAdding(false);
-            loadVehicles();
+            // Subscription handles update
         } catch (error) {
             console.error(error);
         } finally {
@@ -50,7 +48,7 @@ export const VehiclePage = () => {
         if (!window.confirm('Tem certeza que deseja excluir este veículo?')) return;
         try {
             await VehicleService.deleteVehicle(id);
-            setVehicles(prev => prev.filter(v => v.id !== id));
+            // Subscription handles update
         } catch (error) {
             console.error(error);
         }
