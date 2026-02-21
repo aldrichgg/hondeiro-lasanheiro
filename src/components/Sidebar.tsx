@@ -5,6 +5,7 @@ import {
     BookOpen,
     Settings,
     ShieldCheck,
+    Store,
     X
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -22,6 +23,7 @@ const navItems = [
     { icon: MessageSquare, label: 'Chat IA', href: '/chat' },
     { icon: Car, label: 'Meu Veículo', href: '/vehicle' },
     { icon: BookOpen, label: 'Biblioteca', href: '/library' },
+    { icon: Store, label: 'Vendedores', href: '/sellers' },
     { icon: ShieldCheck, label: 'Segurança', href: '/security' },
     { icon: Settings, label: 'Ajustes', href: '/settings' },
 ];

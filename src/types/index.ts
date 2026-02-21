@@ -18,8 +18,10 @@ export interface Vehicle {
 export interface Document {
     id: string;
     title: string;
+    description?: string;
     fileUrl: string;
     type: 'pdf' | 'imagem' | 'audio' | 'video' | 'outro';
+    category: string;
     createdAt: any;
 }
 
@@ -45,5 +47,17 @@ export interface ChatMessage {
     sessionId: string;
     role: 'user' | 'assistant';
     content: string;
+    createdAt: any;
+}
+
+export interface Seller {
+    id: string;
+    name: string;
+    specialty: string;
+    location: string;
+    rating: number;
+    contactUrl: string;
+    logoUrl?: string;
+    verified: boolean;
     createdAt: any;
 }

@@ -11,6 +11,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ChatPage } from './pages/ChatPage';
 import { VehiclePage } from './pages/VehiclePage';
 import { LibraryPage } from './pages/LibraryPage';
+import { SellersPage } from './pages/SellersPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/vehicle" element={<VehiclePage />} />
               <Route path="/library" element={<LibraryPage />} />
+              <Route path="/sellers" element={<SellersPage />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Route>
           </Routes>
