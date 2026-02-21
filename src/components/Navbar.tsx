@@ -1,11 +1,9 @@
-import { LogOut, Bell, Menu } from 'lucide-react';
+import { LogOut, Bell } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import { useNavigate } from 'react-router-dom';
-import { useUI } from '../hooks/UIContext';
 
 export const Navbar = () => {
     const navigate = useNavigate();
-    const { toggleSidebar } = useUI();
 
     const handleLogout = async () => {
         await AuthService.logout();
@@ -15,13 +13,6 @@ export const Navbar = () => {
     return (
         <nav className="h-16 border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
-                <button
-                    onClick={toggleSidebar}
-                    className="p-2 -ml-2 text-zinc-400 hover:text-white lg:hidden transition-colors"
-                    aria-label="Menu"
-                >
-                    <Menu size={24} />
-                </button>
                 <h1 className="text-xl font-bold gradient-text">CivicAI</h1>
             </div>
 

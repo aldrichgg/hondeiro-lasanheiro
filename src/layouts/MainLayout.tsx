@@ -9,7 +9,6 @@ import {
     IconCar,
     IconBook,
     IconBuildingStore,
-    IconShieldLock,
     IconSettings
 } from '@tabler/icons-react';
 import { useAuth } from '../hooks/AuthContext';
@@ -72,7 +71,7 @@ export const MainLayout = () => {
                 </main>
 
                 {/* Floating Dock (Mobile) */}
-                <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50">
                     <FloatingDock
                         items={navLinks}
                         mobileClassName="translate-y-0"

@@ -37,7 +37,7 @@ export const AdminLayout = () => {
         {
             title: "Dashboard",
             icon: <IconLayoutDashboard className="h-full w-full" />,
-            href: "/admin?tab=vehicles",
+            href: "/",
         },
         {
             title: "Veículos",
@@ -154,7 +154,7 @@ export const AdminLayout = () => {
             </main>
 
             {/* Floating Dock (Mobile) */}
-            <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+            <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50">
                 <FloatingDock
                     items={dockLinks}
                     mobileClassName="translate-y-0"
