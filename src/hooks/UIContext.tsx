@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 
 interface UIContextType {
     isSidebarOpen: boolean;
@@ -11,8 +11,8 @@ const UIContext = createContext<UIContextType | undefined>(undefined);
 export const UIProvider = ({ children }: { children: ReactNode }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
-    const closeSidebar = () => setIsSidebarOpen(false);
+    const toggleSidebar = useCallback(() => setIsSidebarOpen((prev) => !prev), []);
+    const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
 
     return (
         <UIContext.Provider value={{ isSidebarOpen, toggleSidebar, closeSidebar }}>
