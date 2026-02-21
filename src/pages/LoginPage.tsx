@@ -39,7 +39,7 @@ export const LoginPage = () => {
                     <p className="text-zinc-400">Inteligência para o seu Honda Civic 92-00</p>
                 </div>
 
-                <form onSubmit={handleLogin} className="glass p-8 rounded-3xl space-y-6">
+                <form onSubmit={handleLogin} className="glass p-6 sm:p-8 rounded-3xl space-y-6">
                     {error && (
                         <div className="p-3 text-sm bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-center">
                             {error}

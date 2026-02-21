@@ -4,11 +4,14 @@ import {
     MessageSquare,
     BookOpen,
     Settings,
-    ShieldCheck
+    ShieldCheck,
+    X
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useUI } from '../hooks/UIContext';
+import { useEffect } from 'react';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -24,9 +27,30 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
+    const { isSidebarOpen, closeSidebar } = useUI();
+    const location = useLocation();
+
+    // Close sidebar on navigation (mobile)
+    useEffect(() => {
+        closeSidebar();
+    }, [location.pathname, closeSidebar]);
+
     return (
-        <aside className="w-64 border-r border-zinc-800 bg-zinc-950 flex flex-col h-[calc(100vh-64px)] overflow-y-auto">
-            <div className="p-6">
+        <aside className={cn(
+            "fixed inset-y-0 left-0 z-40 w-64 border-r border-zinc-800 bg-zinc-950 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-[calc(100vh-64px)]",
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+            <div className="flex items-center justify-between p-6 lg:hidden">
+                <span className="text-xl font-bold gradient-text">CivicAI</span>
+                <button
+                    onClick={closeSidebar}
+                    className="p-2 text-zinc-400 hover:text-white transition-colors"
+                >
+                    <X size={20} />
+                </button>
+            </div>
+
+            <div className="p-6 pt-2 lg:pt-6">
                 <div className="space-y-1">
                     {navItems.map((item) => (
                         <NavLink

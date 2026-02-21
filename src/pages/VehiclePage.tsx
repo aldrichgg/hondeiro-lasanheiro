@@ -89,16 +89,16 @@ export const VehiclePage = () => {
     };
 
     return (
-        <div className="space-y-8 max-w-4xl">
-            <header className="flex items-center justify-between">
+        <div className="space-y-6 md:space-y-8 max-w-4xl">
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Meu Veículo</h1>
-                    <p className="text-zinc-400 mt-1">Perfil do seu Honda Civic para respostas personalizadas.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white">Meu Veículo</h1>
+                    <p className="text-zinc-400 mt-1 text-sm md:text-base">Perfil do seu Honda Civic para respostas personalizadas.</p>
                 </div>
                 {!isFormOpen && !vehicle && (
                     <button
                         onClick={openCreate}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all"
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all w-full sm:w-auto text-sm"
                     >
                         <Plus size={18} />
                         Cadastrar veículo
@@ -196,33 +196,35 @@ export const VehiclePage = () => {
             )}
 
             {vehicle && !isFormOpen && (
-                <div className="glass p-6 rounded-3xl border border-zinc-800/50 space-y-6">
-                    <div className="flex items-start justify-between">
+                <div className="glass p-5 md:p-6 rounded-3xl border border-zinc-800/50 space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="h-14 w-14 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400">
-                                <Car size={28} />
+                            <div className="h-12 w-12 md:h-14 md:w-14 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 shrink-0">
+                                <Car size={24} className="md:w-7 md:h-7" />
                             </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-white">{vehicle.nickname}</h3>
-                                <p className="text-zinc-500">
+                            <div className="min-w-0">
+                                <h3 className="text-lg md:text-xl font-bold text-white truncate">{vehicle.nickname}</h3>
+                                <p className="text-zinc-500 text-sm">
                                     {vehicle.model} · {vehicle.year}
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 sm:self-start">
                             <button
                                 onClick={() => openEdit(vehicle)}
-                                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                                className="flex-1 sm:flex-none p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
                                 title="Editar"
                             >
                                 <Pencil size={18} />
+                                <span className="sm:hidden text-sm font-medium">Editar</span>
                             </button>
                             <button
                                 onClick={() => vehicle.id && handleDelete(vehicle.id)}
-                                className="p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-500/30 transition-colors"
+                                className="flex-1 sm:flex-none p-2.5 rounded-xl border border-zinc-700 text-zinc-400 hover:text-red-400 hover:border-red-500/30 transition-colors flex items-center justify-center gap-2"
                                 title="Excluir"
                             >
                                 <Trash2 size={18} />
+                                <span className="sm:hidden text-sm font-medium">Excluir</span>
                             </button>
                         </div>
                     </div>

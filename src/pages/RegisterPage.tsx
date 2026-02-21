@@ -43,7 +43,7 @@ export const RegisterPage = () => {
                     <p className="text-zinc-400">Comece a cuidar melhor do seu Civic hoje</p>
                 </div>
 
-                <form onSubmit={handleRegister} className="glass p-8 rounded-3xl space-y-6">
+                <form onSubmit={handleRegister} className="glass p-6 sm:p-8 rounded-3xl space-y-6">
                     {error && (
                         <div className="p-3 text-sm bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-center">
                             {error}
