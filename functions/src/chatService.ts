@@ -7,8 +7,8 @@ function getDb() {
 }
 
 export const chatService = {
-    askAI: async (question: string) => {
-        // 1. Generate embedding for query
+    askAI: async (question: string, provider: string = 'gemini') => {
+        // 1. Generate embedding for query (always using Gemini for embeddings)
         const queryEmbedding = await embeddingService.generateEmbedding(question);
 
         // 2. Search similar chunks
@@ -17,8 +17,8 @@ export const chatService = {
         // 3. Build context
         const context = chunks.map(c => c.content).join('\n\n---\n\n');
 
-        // 4. Get AI response
-        const answer = await aiService.getChatResponse(context, question);
+        // 4. Get AI response using the selected provider
+        const answer = await aiService.getChatResponse(context, question, provider);
 
         return answer;
     }

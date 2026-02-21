@@ -18,7 +18,7 @@ const functions = getFunctions();
 const askAICallable = httpsCallable(functions, 'askAI');
 
 export const ChatService = {
-    sendMessage: async (userId: string, sessionId: string, content: string) => {
+    sendMessage: async (userId: string, sessionId: string, content: string, provider: string = 'gemini') => {
         // Add user message to Firestore
         await addDoc(collection(db, 'chat_messages'), {
             userId,
@@ -28,12 +28,8 @@ export const ChatService = {
             createdAt: serverTimestamp()
         });
 
-        // Update session lastMessageAt and title if it's the first message
-        // For simplicity, we'll just update lastMessageAt
-        // Updating title would ideally happen via a hook or background function
-
-        // Call Cloud Function for RAG
-        const result = await askAICallable({ question: content });
+        // Call Cloud Function for RAG with selected provider
+        const result = await askAICallable({ question: content, provider });
         const responseData = result.data as { answer: string };
 
         // Add assistant response to Firestore
@@ -48,7 +44,7 @@ export const ChatService = {
         return responseData.answer;
     },
 
-    subscribeToSessions: (userId: string, callback: (sessions: ChatSession[]) => void) => {
+    subscribeToSessions: (userId: string, callback: (sessions: ChatSession[]) => void, onError?: (error: any) => void) => {
         const q = query(
             collection(db, 'chat_sessions'),
             where('userId', '==', userId),
@@ -61,12 +57,13 @@ export const ChatService = {
                 ...doc.data()
             } as ChatSession));
             callback(sessions);
-        });
+        }, onError);
     },
 
-    subscribeToMessages: (sessionId: string, callback: (messages: ChatMessage[]) => void) => {
+    subscribeToMessages: (userId: string, sessionId: string, callback: (messages: ChatMessage[]) => void, onError?: (error: any) => void) => {
         const q = query(
             collection(db, 'chat_messages'),
+            where('userId', '==', userId),
             where('sessionId', '==', sessionId),
             orderBy('createdAt', 'asc')
         );
@@ -77,7 +74,7 @@ export const ChatService = {
                 ...doc.data()
             } as ChatMessage));
             callback(messages);
-        });
+        }, onError);
     },
 
     createSession: async (userId: string, title: string = 'Nova Conversa') => {
@@ -90,14 +87,18 @@ export const ChatService = {
         return docRef.id;
     },
 
-    deleteSession: async (sessionId: string) => {
+    deleteSession: async (userId: string, sessionId: string) => {
         const batch = writeBatch(db);
 
         // Delete session doc
         batch.delete(doc(db, 'chat_sessions', sessionId));
 
-        // Delete all messages in session
-        const q = query(collection(db, 'chat_messages'), where('sessionId', '==', sessionId));
+        // Delete all messages in session (filtering by userId for security)
+        const q = query(
+            collection(db, 'chat_messages'),
+            where('userId', '==', userId),
+            where('sessionId', '==', sessionId)
+        );
         const snapshot = await getDocs(q);
         snapshot.docs.forEach((d) => batch.delete(d.ref));
 
@@ -110,7 +111,7 @@ export const ChatService = {
         const snapshot = await getDocs(q);
 
         for (const sessionDoc of snapshot.docs) {
-            await ChatService.deleteSession(sessionDoc.id);
+            await ChatService.deleteSession(userId, sessionDoc.id);
         }
     }
 };

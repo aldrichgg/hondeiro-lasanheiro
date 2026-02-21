@@ -24,30 +24,48 @@ export const ChatPage = () => {
     const [loading, setLoading] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [messageError, setMessageError] = useState<string | null>(null);
+    const [retrying, setRetrying] = useState(0);
+    const [provider, setProvider] = useState<'gemini' | 'openai'>('gemini');
 
     // Subscribe to sessions
     useEffect(() => {
         if (user) {
-            const unsubscribe = ChatService.subscribeToSessions(user.uid, (data) => {
-                setSessions(data);
-                // If no session selected, select the most recent one
-                if (data.length > 0 && !currentSessionId) {
-                    setCurrentSessionId(data[0].id);
-                }
-            });
+            const unsubscribe = ChatService.subscribeToSessions(user.uid,
+                (data) => {
+                    setSessions(data);
+                    if (data.length > 0 && !currentSessionId) {
+                        setCurrentSessionId(data[0].id);
+                    }
+                },
+                (err) => console.error('Session subscription error:', err)
+            );
             return unsubscribe;
         }
     }, [user]);
 
     // Subscribe to messages of current session
     useEffect(() => {
-        if (currentSessionId) {
-            const unsubscribe = ChatService.subscribeToMessages(currentSessionId, setMessages);
+        if (user && currentSessionId) {
+            setMessageError(null);
+            const unsubscribe = ChatService.subscribeToMessages(
+                user.uid,
+                currentSessionId,
+                setMessages,
+                (err: any) => {
+                    console.error('Message subscription error:', err);
+                    if (err.code === 'failed-precondition') {
+                        setMessageError('Os índices do banco de dados estão sendo otimizados. Isso pode levar alguns minutos.');
+                    } else {
+                        setMessageError('Erro ao carregar mensagens. Verifique sua conexão.');
+                    }
+                }
+            );
             return unsubscribe;
         } else {
             setMessages([]);
         }
-    }, [currentSessionId]);
+    }, [user, currentSessionId, retrying]);
 
     useEffect(() => {
         scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -68,10 +86,10 @@ export const ChatPage = () => {
 
     const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
         e.stopPropagation();
-        if (!window.confirm('Excluir esta conversa permanentemente?')) return;
+        if (!user || !window.confirm('Excluir esta conversa permanentemente?')) return;
 
         try {
-            await ChatService.deleteSession(sessionId);
+            await ChatService.deleteSession(user.uid, sessionId);
             if (currentSessionId === sessionId) {
                 setCurrentSessionId(sessions.find(s => s.id !== sessionId)?.id || null);
             }
@@ -95,7 +113,7 @@ export const ChatPage = () => {
         setLoading(true);
 
         try {
-            await ChatService.sendMessage(user.uid, sessionId, text);
+            await ChatService.sendMessage(user.uid, sessionId, text, provider);
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
@@ -201,8 +219,34 @@ export const ChatPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 rounded-lg border border-zinc-700/50 text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">
-                                <Info size={12} /> RAG Ativo
+                            {/* Model Selector */}
+                            <div className="flex bg-zinc-800/50 p-1 rounded-xl border border-zinc-700/50">
+                                <button
+                                    onClick={() => setProvider('gemini')}
+                                    className={clsx(
+                                        "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all",
+                                        provider === 'gemini'
+                                            ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                                            : "text-zinc-500 hover:text-zinc-300"
+                                    )}
+                                >
+                                    Gemini 3 Flash
+                                </button>
+                                <button
+                                    onClick={() => setProvider('openai')}
+                                    className={clsx(
+                                        "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all",
+                                        provider === 'openai'
+                                            ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                                            : "text-zinc-500 hover:text-zinc-300"
+                                    )}
+                                >
+                                    GPT-5 Nano
+                                </button>
+                            </div>
+
+                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-zinc-800/50 rounded-lg border border-zinc-700/50 text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">
+                                <Info size={12} className="text-zinc-500" /> RAG Ativo
                             </div>
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -218,7 +262,19 @@ export const ChatPage = () => {
                         ref={scrollRef}
                         className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar"
                     >
-                        {!currentSessionId && messages.length === 0 && (
+                        {messageError && (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center space-y-3">
+                                <p className="text-sm text-red-400">{messageError}</p>
+                                <button
+                                    onClick={() => setRetrying(prev => prev + 1)}
+                                    className="text-xs font-bold text-white bg-red-500/20 px-4 py-2 rounded-lg hover:bg-red-500/30 transition-all"
+                                >
+                                    Tentar Novamente
+                                </button>
+                            </div>
+                        )}
+
+                        {!currentSessionId && messages.length === 0 && !messageError && (
                             <div className="h-full flex flex-col items-center justify-center text-center space-y-8 max-w-md mx-auto">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-20 rounded-full" />

@@ -1,27 +1,26 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-let openaiInstance: OpenAI | null = null;
+let genAIInstance: GoogleGenerativeAI | null = null;
 
-function getOpenAI() {
-    if (!openaiInstance) {
-        const apiKey = process.env.OPENAI_API_KEY;
+function getGenAI() {
+    if (!genAIInstance) {
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            throw new Error('OPENAI_API_KEY is not set');
+            throw new Error('GEMINI_API_KEY is not set');
         }
-        openaiInstance = new OpenAI({ apiKey });
+        genAIInstance = new GoogleGenerativeAI(apiKey);
     }
-    return openaiInstance;
+    return genAIInstance;
 }
 
 export const embeddingService = {
     generateEmbedding: async (text: string) => {
-        const openai = getOpenAI();
-        const response = await openai.embeddings.create({
-            model: 'text-embedding-3-small',
-            input: text,
-            encoding_format: 'float',
-        });
+        const genAI = getGenAI();
+        const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 
-        return response.data[0].embedding;
+        const result = await model.embedContent(text);
+        const embedding = result.embedding;
+
+        return embedding.values;
     }
 };
