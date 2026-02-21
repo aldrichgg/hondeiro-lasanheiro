@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AdminService } from '../services/AdminService';
 import { LibraryService } from '../services/LibraryService';
 import { SellerService } from '../services/SellerService';
@@ -20,9 +21,24 @@ import { LIBRARY_CATEGORIES } from '../constants/libraryCategories';
 type TabId = 'vehicles' | 'library' | 'sellers';
 
 export const AdminPage = () => {
-    const [activeTab, setActiveTab] = useState<TabId>('vehicles');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab') as TabId;
+    const [activeTab, setActiveTab] = useState<TabId>(tabParam || 'vehicles');
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
+
+    useEffect(() => {
+        if (tabParam && tabParam !== activeTab) {
+            setActiveTab(tabParam);
+            setIsAdding(false);
+        }
+    }, [tabParam]);
+
+    const handleTabChange = (tabId: TabId) => {
+        setSearchParams({ tab: tabId });
+        setActiveTab(tabId);
+        setIsAdding(false);
+    };
 
     // Data states
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -32,7 +48,7 @@ export const AdminPage = () => {
     // Form states
     const [newDoc, setNewDoc] = useState<Partial<Document>>({
         title: '',
-        category: 'MECANICA',
+        category: 'mecanica',
         type: 'pdf',
         description: ''
     });
@@ -78,7 +94,7 @@ export const AdminPage = () => {
                 description: newDoc.description || ''
             });
             setIsAdding(false);
-            setNewDoc({ title: '', category: 'MECANICA', type: 'pdf', description: '' });
+            setNewDoc({ title: '', category: 'mecanica', type: 'pdf', description: '' });
             loadData();
         } catch (err) {
             alert('Erro ao adicionar documento');
@@ -139,25 +155,24 @@ export const AdminPage = () => {
                     <p className="text-zinc-500 mt-2 font-medium">Controle total sobre os dados da plataforma CivicAI.</p>
                 </div>
 
-                <div className="flex gap-2 p-1.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => {
-                                setActiveTab(tab.id as TabId);
-                                setIsAdding(false);
-                            }}
-                            className={`
-                                flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm
-                                ${activeTab === tab.id
-                                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
-                                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}
-                            `}
-                        >
-                            <tab.icon size={16} />
-                            {tab.label}
-                        </button>
-                    ))}
+                <div className="flex gap-2 p-1.5 bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-x-auto scrollbar-hide max-w-full overflow-hidden">
+                    <div className="flex gap-2 min-w-max">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => handleTabChange(tab.id as TabId)}
+                                className={`
+                                    flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm whitespace-nowrap
+                                    ${activeTab === tab.id
+                                        ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20'
+                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}
+                                `}
+                            >
+                                <tab.icon size={16} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </header>
 
@@ -171,7 +186,7 @@ export const AdminPage = () => {
                 ) : (
                     <div className="space-y-6">
                         {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                             <div className="glass p-6 rounded-3xl border border-zinc-800/50 flex flex-col justify-between h-32 relative overflow-hidden group">
                                 <Car className="absolute -right-4 -bottom-4 text-white/5 group-hover:text-blue-500/10 transition-all duration-700" size={120} />
                                 <span className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Total Veículos</span>
@@ -197,7 +212,7 @@ export const AdminPage = () => {
                                         Veículos Cadastrados
                                     </h2>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {vehicles.map(vehicle => (
                                         <div key={vehicle.id} className="bg-zinc-900/40 p-5 rounded-2xl border border-zinc-800/50 hover:border-zinc-700/50 hover:bg-zinc-900/60 transition-all flex justify-between items-start group shadow-sm">
                                             <div className="space-y-1">
