@@ -19,6 +19,7 @@ export interface Document {
     id: string;
     title: string;
     fileUrl: string;
+    type: 'pdf' | 'imagem' | 'audio' | 'video' | 'outro';
     createdAt: any;
 }
 

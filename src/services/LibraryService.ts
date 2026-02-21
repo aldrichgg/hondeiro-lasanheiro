@@ -13,14 +13,17 @@ import { db, storage } from '../lib/firebase';
 import type { Document } from '../types';
 
 export const LibraryService = {
-    uploadPDF: async (file: File) => {
-        const storageRef = ref(storage, `documents/${Date.now()}_${file.name}`);
+    uploadFile: async (file: File) => {
+        let folder = 'outro';
+        if (file.type.includes('pdf')) folder = 'pdf';
+        else if (file.type.includes('image')) folder = 'imagens';
+        else if (file.type.includes('audio')) folder = 'audios';
+        else if (file.type.includes('video')) folder = 'videos';
+
+        const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        // The Cloud Function will be triggered by storage upload or manually.
-        // However, the prompt says "Usuario envia PDF -> 1 salva no Firebase Storage -> 2 Cloud Function extrai texto".
-        // We should also record the document in Firestore to show it in the UI.
         return {
             name: file.name,
             url: downloadURL
@@ -28,11 +31,28 @@ export const LibraryService = {
     },
 
     getDocuments: async () => {
-        const q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as Document));
+        try {
+            // Priority query with ordering
+            const q = query(collection(db, 'documents'), orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Document));
+        } catch (error) {
+            console.error('Error fetching documents with ordering:', error);
+            // Fallback query without ordering (in case index is missing)
+            try {
+                const q = query(collection(db, 'documents'));
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                } as Document));
+            } catch (innerError) {
+                console.error('Error fetching documents fallback:', innerError);
+                throw innerError;
+            }
+        }
     }
 };
