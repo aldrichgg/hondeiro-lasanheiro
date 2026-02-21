@@ -15,6 +15,7 @@ import {
     CheckCircle2,
     ShieldCheck
 } from 'lucide-react';
+import { LIBRARY_CATEGORIES } from '../constants/libraryCategories';
 
 type TabId = 'vehicles' | 'library' | 'sellers';
 
@@ -267,10 +268,9 @@ export const AdminPage = () => {
                                                     onChange={e => setNewDoc({ ...newDoc, category: e.target.value })}
                                                     className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
                                                 >
-                                                    <option value="MECANICA">Mecânica</option>
-                                                    <option value="SUSPENSAO">Suspensão</option>
-                                                    <option value="ELETRICA">Elétrica</option>
-                                                    <option value="PERFORMANCE">Performance</option>
+                                                    {LIBRARY_CATEGORIES.filter(c => c.id !== 'all').map(cat => (
+                                                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="md:col-span-2 space-y-2">
@@ -299,7 +299,9 @@ export const AdminPage = () => {
                                                 <div>
                                                     <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors">{doc.title}</h3>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold">{doc.category}</span>
+                                                        <span className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold">
+                                                            {LIBRARY_CATEGORIES.find(cat => cat.id === doc.category)?.label || doc.category}
+                                                        </span>
                                                         <span className="text-[10px] text-zinc-600 font-bold">•</span>
                                                         <span className="text-[10px] text-zinc-600 font-bold uppercase">{doc.type}</span>
                                                     </div>
