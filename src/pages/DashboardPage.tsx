@@ -26,6 +26,7 @@ export const DashboardPage = () => {
             ),
             icon: <MessageSquare className="h-4 w-4 text-neutral-500" />,
             className: "md:col-span-2",
+            href: "/chat",
         },
         {
             title: "Meu Veículo",
@@ -37,6 +38,7 @@ export const DashboardPage = () => {
             ),
             icon: <Car className="h-4 w-4 text-neutral-500" />,
             className: "md:col-span-1",
+            href: "/vehicle",
         },
         {
             title: "Biblioteca Técnica",
@@ -48,6 +50,7 @@ export const DashboardPage = () => {
             ),
             icon: <BookOpen className="h-4 w-4 text-neutral-500" />,
             className: "md:col-span-1",
+            href: "/library",
         },
         {
             title: "Vendedores Autorizados",
@@ -59,6 +62,7 @@ export const DashboardPage = () => {
             ),
             icon: <Store className="h-4 w-4 text-neutral-500" />,
             className: "md:col-span-2",
+            href: "/sellers",
         },
     ];
 
@@ -93,6 +97,7 @@ export const DashboardPage = () => {
                             header={item.header}
                             icon={item.icon}
                             className={item.className}
+                            href={item.href}
                         />
                     ))}
                 </BentoGrid>

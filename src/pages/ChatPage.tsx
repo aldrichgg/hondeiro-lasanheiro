@@ -34,7 +34,7 @@ export const ChatPage = () => {
     });
 
     return (
-        <div className="flex flex-col bg-zinc-950 rounded-2xl md:rounded-3xl border border-zinc-800/50 overflow-hidden h-[calc(100vh-130px)] md:h-[calc(100vh-160px)] shadow-2xl">
+        <div className="flex flex-col bg-zinc-950 rounded-2xl md:rounded-3xl border border-zinc-800/50 overflow-hidden h-[calc(100vh-160px)] md:h-[calc(100vh-160px)] shadow-2xl pb-20 md:pb-0">
             <header className="flex items-center gap-3 md:gap-4 p-4 md:p-6 border-b border-zinc-800/50 bg-zinc-900/20 shrink-0">
                 <div className="h-10 w-10 md:h-12 md:w-12 bg-blue-600/10 rounded-xl md:rounded-2xl flex items-center justify-center text-blue-400 ring-1 ring-blue-500/20">
                     <Bot size={24} className="md:w-7 md:h-7" />

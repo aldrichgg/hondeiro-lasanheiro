@@ -56,12 +56,12 @@ export const MainLayout = () => {
             <Navbar />
             <div className="flex flex-1 relative">
                 <Sidebar />
-                <main className="flex-1 p-4 md:p-8 overflow-y-auto h-[calc(100vh-64px)] lg:px-12 pb-32 lg:pb-8">
+                <main className="flex-1 p-4 md:p-8 overflow-y-auto h-[calc(100vh-64px)] lg:px-12 pb-24 lg:pb-8">
                     <Outlet />
                 </main>
 
                 {/* Floating Dock (Mobile) */}
-                <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50">
+                <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
                     <FloatingDock
                         items={navLinks}
                         mobileClassName="translate-y-0"
