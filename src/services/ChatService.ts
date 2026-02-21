@@ -5,7 +5,9 @@ import {
     where,
     orderBy,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    getDocs,
+    writeBatch
 } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../lib/firebase';
@@ -53,5 +55,17 @@ export const ChatService = {
             } as ChatMessage));
             callback(messages);
         });
+    },
+
+    clearChat: async (userId: string) => {
+        const q = query(collection(db, 'chat_messages'), where('userId', '==', userId));
+        const snapshot = await getDocs(q);
+
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+
+        await batch.commit();
     }
 };

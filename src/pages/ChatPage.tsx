@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/AuthContext';
 import { ChatService } from '../services/ChatService';
 import type { ChatMessage } from '../types';
-import { Send, Bot, User as UserIcon, Loader2, Info } from 'lucide-react';
+import { Send, Bot, User as UserIcon, Loader2, Info, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const ChatPage = () => {
@@ -40,6 +40,17 @@ export const ChatPage = () => {
         }
     };
 
+    const handleClearChat = async () => {
+        if (!user || !window.confirm('Deseja realmente limpar todo o histórico de mensagens?')) return;
+
+        try {
+            await ChatService.clearChat(user.uid);
+            setMessages([]);
+        } catch (error) {
+            console.error('Error clearing chat:', error);
+        }
+    };
+
     return (
         <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto space-y-4">
             <header className="flex items-center justify-between pb-4 border-b border-zinc-800">
@@ -50,9 +61,20 @@ export const ChatPage = () => {
                     </h1>
                     <p className="text-sm text-zinc-500">Baseado em manuais técnicos de 1992 a 2000.</p>
                 </div>
-                <div className="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg text-zinc-400 text-xs">
-                    <Info size={14} />
-                    Modo Especialista Ativo
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg text-zinc-400 text-xs">
+                        <Info size={14} />
+                        Modo Especialista Ativo
+                    </div>
+                    {messages.length > 0 && (
+                        <button
+                            onClick={handleClearChat}
+                            className="p-2 text-zinc-500 hover:text-red-400 transition-colors bg-zinc-900 rounded-lg border border-zinc-800"
+                            title="Limpar Histórico"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
                 </div>
             </header>
 

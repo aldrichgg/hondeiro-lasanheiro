@@ -46,6 +46,16 @@ export const VehiclePage = () => {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Tem certeza que deseja excluir este veículo?')) return;
+        try {
+            await VehicleService.deleteVehicle(id);
+            setVehicles(prev => prev.filter(v => v.id !== id));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="space-y-8 max-w-4xl">
             <header className="flex items-center justify-between">
@@ -151,7 +161,10 @@ export const VehiclePage = () => {
                                     <p className="text-zinc-500 text-sm">{vehicle.model} - {vehicle.year}</p>
                                 </div>
                             </div>
-                            <button className="p-2 text-zinc-600 hover:text-red-400 transition-colors">
+                            <button
+                                onClick={() => vehicle.id && handleDelete(vehicle.id)}
+                                className="p-2 text-zinc-600 hover:text-red-400 transition-colors"
+                            >
                                 <Trash2 size={18} />
                             </button>
                         </div>

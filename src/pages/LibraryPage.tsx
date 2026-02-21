@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LibraryService } from '../services/LibraryService';
 import type { Document } from '../types';
-import { BookOpen, Upload, FileText, CheckCircle2, Loader2, ArrowUpRight } from 'lucide-react';
+import { BookOpen, Upload, FileText, CheckCircle2, Loader2, ArrowUpRight, Trash2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export const LibraryPage = () => {
@@ -39,6 +39,18 @@ export const LibraryPage = () => {
             setError('Falha no upload do arquivo.');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleDelete = async (id: string, fileUrl: string) => {
+        if (!window.confirm('Tem certeza que deseja excluir este arquivo?')) return;
+
+        try {
+            await LibraryService.deleteFile(id, fileUrl);
+            setDocuments(prev => prev.filter(d => d.id !== id));
+        } catch (err) {
+            console.error(err);
+            setError('Erro ao excluir o arquivo.');
         }
     };
 
@@ -168,14 +180,24 @@ export const LibraryPage = () => {
                                         {doc.type} • {doc.createdAt ? new Date(doc.createdAt?.seconds * 1000).toLocaleDateString() : 'pendente'}
                                     </p>
                                 </div>
-                                <a
-                                    href={doc.fileUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="p-2 text-zinc-600 hover:text-white transition-colors bg-zinc-900/50 rounded-lg"
-                                >
-                                    <ArrowUpRight size={18} />
-                                </a>
+                                <div className="flex gap-2">
+                                    <a
+                                        href={doc.fileUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 text-zinc-600 hover:text-blue-400 transition-colors bg-zinc-900/50 rounded-lg hover:bg-blue-500/10"
+                                        title="Abrir arquivo"
+                                    >
+                                        <ArrowUpRight size={18} />
+                                    </a>
+                                    <button
+                                        onClick={() => handleDelete(doc.id, doc.fileUrl)}
+                                        className="p-2 text-zinc-600 hover:text-red-400 transition-colors bg-zinc-900/50 rounded-lg hover:bg-red-500/10"
+                                        title="Excluir"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
 

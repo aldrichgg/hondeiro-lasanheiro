@@ -25,10 +25,23 @@ export const processDocument = onObjectFinalized(async (event) => {
     else if (filePath.startsWith('videos/')) type = 'video';
     else if (filePath.startsWith('documents/')) type = 'pdf'; // Legacy support
 
-    // 1. Create document record with type
+    // 1. Generate a permanent download token and URL for browser access
+    const downloadToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const bucket = admin.storage().bucket(object.bucket);
+    const file = bucket.file(filePath);
+
+    await file.setMetadata({
+        metadata: {
+            firebaseStorageDownloadTokens: downloadToken
+        }
+    });
+
+    const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodeURIComponent(filePath)}?alt=media&token=${downloadToken}`;
+
+    // 2. Create document record with type and public download URL
     const docData: any = {
         title: fileName,
-        fileUrl: `https://storage.googleapis.com/${object.bucket}/${filePath}`,
+        fileUrl: downloadUrl,
         type: type,
         contentType: object.contentType,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),

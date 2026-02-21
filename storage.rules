@@ -39,6 +39,11 @@ service firebase.storage {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
     
+    // Manuals Folder
+    match /manuals/{allPaths=**} {
+      allow read, delete: if isSignedIn();
+    }
+
     // Legacy/Global documents path (if needed)
     match /documents/{allPaths=**} {
       allow read, write: if isSignedIn();

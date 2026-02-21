@@ -1,15 +1,57 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    collection,
+    query,
+    where,
+    getCountFromServer
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../hooks/AuthContext';
 import {
     MessageSquare,
     Car,
     BookOpen,
     ArrowRight,
-    TrendingUp,
-    AlertCircle
+    Loader2
 } from 'lucide-react';
 
 export const DashboardPage = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const [stats, setStats] = useState({
+        vehicles: 0,
+        chats: 0,
+        manuals: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user) {
+            loadStats();
+        }
+    }, [user]);
+
+    const loadStats = async () => {
+        if (!user) return;
+        try {
+            const [vSnapshot, cSnapshot, mSnapshot] = await Promise.all([
+                getCountFromServer(query(collection(db, 'vehicles'), where('userId', '==', user.uid))),
+                getCountFromServer(query(collection(db, 'chat_messages'), where('userId', '==', user.uid))),
+                getCountFromServer(collection(db, 'documents'))
+            ]);
+
+            setStats({
+                vehicles: vSnapshot.data().count,
+                chats: cSnapshot.data().count,
+                manuals: mSnapshot.data().count
+            });
+        } catch (error) {
+            console.error('Error loading dashboard stats:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -20,30 +62,30 @@ export const DashboardPage = () => {
 
             {/* Stats / Quick Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-blue-500/30 transition-all">
+                <div onClick={() => navigate('/vehicle')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-blue-500/30 transition-all">
                     <div className="space-y-1">
                         <p className="text-zinc-500 text-sm font-medium">Veículos Cadastrados</p>
-                        <p className="text-2xl font-bold text-white">1</p>
+                        {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.vehicles}</p>}
                     </div>
                     <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
                         <Car size={24} />
                     </div>
                 </div>
 
-                <div className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-emerald-500/30 transition-all">
+                <div onClick={() => navigate('/chat')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-emerald-500/30 transition-all">
                     <div className="space-y-1">
                         <p className="text-zinc-500 text-sm font-medium">Consultas IA</p>
-                        <p className="text-2xl font-bold text-white">24</p>
+                        {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.chats}</p>}
                     </div>
                     <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                         <MessageSquare size={24} />
                     </div>
                 </div>
 
-                <div className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-amber-500/30 transition-all">
+                <div onClick={() => navigate('/library')} className="glass p-6 rounded-2xl flex items-center justify-between group cursor-pointer hover:border-amber-500/30 transition-all">
                     <div className="space-y-1">
                         <p className="text-zinc-500 text-sm font-medium">Manuais Disponíveis</p>
-                        <p className="text-2xl font-bold text-white">12</p>
+                        {loading ? <Loader2 size={16} className="animate-spin text-zinc-500" /> : <p className="text-2xl font-bold text-white">{stats.manuals}</p>}
                     </div>
                     <div className="p-3 bg-amber-500/10 rounded-xl text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
                         <BookOpen size={24} />
@@ -98,29 +140,6 @@ export const DashboardPage = () => {
                 </div>
             </div>
 
-            {/* Notifications / Alerts Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <TrendingUp className="text-blue-400" size={20} />
-                    Atividade Recente
-                </h3>
-                <div className="space-y-2">
-                    {[1, 2].map(i => (
-                        <div key={i} className="glass p-4 rounded-xl flex items-center gap-4 hover:bg-zinc-900/50 transition-colors">
-                            <div className="h-10 w-10 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-500">
-                                <AlertCircle size={20} />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm text-zinc-200">Manual de Oficina (D16Y8) processado com sucesso.</p>
-                                <p className="text-xs text-zinc-500">Há 2 horas</p>
-                            </div>
-                            <button className="text-zinc-500 hover:text-white">
-                                <ArrowRight size={16} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 };

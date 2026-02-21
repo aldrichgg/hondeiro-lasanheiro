@@ -21,9 +21,9 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && isOwner(resource.data.userId);
     }
 
-    // Documents (Read-only for users)
+    // Documents
     match /documents/{documentId} {
-      allow read: if isSignedIn();
+      allow read, delete: if isSignedIn();
       allow write: if false; // Only via backend/admin
     }
 

@@ -2,12 +2,15 @@ import {
     collection,
     getDocs,
     query,
-    orderBy
+    orderBy,
+    doc,
+    deleteDoc
 } from 'firebase/firestore';
 import {
     ref,
     uploadBytes,
-    getDownloadURL
+    getDownloadURL,
+    deleteObject
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
 import type { Document } from '../types';
@@ -53,6 +56,28 @@ export const LibraryService = {
                 console.error('Error fetching documents fallback:', innerError);
                 throw innerError;
             }
+        }
+    },
+
+    deleteFile: async (id: string, fileUrl: string) => {
+        // 1. Delete from Firestore
+        await deleteDoc(doc(db, 'documents', id));
+
+        // 2. Delete from Storage (if possible to extract path)
+        try {
+            // URL format: https://firebasestorage.googleapis.com/v0/b/[BUCKET]/o/[PATH]?alt=media&token=[TOKEN]
+            const decodedUrl = decodeURIComponent(fileUrl);
+            const pathStart = decodedUrl.indexOf('/o/') + 3;
+            const pathEnd = decodedUrl.indexOf('?');
+            const storagePath = decodedUrl.substring(pathStart, pathEnd);
+
+            if (storagePath) {
+                const storageRef = ref(storage, storagePath);
+                await deleteObject(storageRef);
+            }
+        } catch (error) {
+            console.error('Error deleting file from storage:', error);
+            // We don't throw here to avoid blocking UI if only storage deletion fails
         }
     }
 };
